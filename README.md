@@ -50,3 +50,7 @@ syscall
 
 li $v0, 5 # Apenas para esperar um [ENTER]
 syscall
+
+=============================////\\\\========================================
+
+qualquer operaçao feita o valor sera armazenado em $v0 e $v1
