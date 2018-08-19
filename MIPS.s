@@ -5,12 +5,13 @@
 # Fabio Seiji Irokawa   17057720
 # Cesar Augusto Pinardi 17270182
 # Lucas Coutinho        17776501
+# Fabio Luis Dumont     17049461
 
 
 .data
 
 	msgInicio:  	.asciiz "PROJETO ARQUITETURA DE COMPUTADORES:\n\nCONTROLE DE ABASTECIMENTO\n"
-	msgDev:				.asciiz "\nDesenvolvido por:\n Adriano\n Cesar\n Fabio\n Lucas\n"
+	msgDev:				.asciiz "\nDesenvolvido por:\n Adriano\n Cesar\n Fabio Seiji\n Lucas\n Fabio Dumont\n"
 
 .text
 main:
