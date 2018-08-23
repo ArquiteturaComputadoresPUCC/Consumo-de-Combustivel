@@ -22,6 +22,7 @@
 	msgCreditos: 	  	.asciiz "\n Adriano de Oliveira Munin 17066960 \n Cesar Augusto Pinardi 17270182 \n Fabio Luis Dumont 17049461 \n Fabio Seiji Irokawa 17057720 \n Lucas Rodrigues Coutinho 17776501 \n "
 	msgExcluir:		.asciiz "\n Insira a data que deseja excluir: "
 	msgConsumoMedio:	.asciiz "\n Consumo medio do veiculo: "
+	msgControle:		.asciiz "\n Insira um valor de 0 a 6\n"
 	
 .text
 main:
@@ -29,7 +30,7 @@ main:
 	li $v0, 4					# Codigo SysCall p/ escrever strings
 	la $a0, msgInicio				# Parametro (string a ser escrita)
 	syscall
-	
+	menu:
 	li $v0, 4
 	la $a0, msgMenu
 	syscall
@@ -37,6 +38,7 @@ main:
 	#li $v0, 5 					# Codigo SysCall p/ ler inteiros
 	#syscall 					# Inteiro lido vai ficar em $v0
 	#
+    #
 	#beq $v0, 0, exit
 	#beq $v0, 1, cadastrar
 	#beq $v0, 2, excluir_abastecimento
@@ -44,6 +46,12 @@ main:
 	#beq $v0, 4, exibir_consumo_medio
 	#beq $v0, 5, exibir_preco_medio_posto
 	#beq $v0, 6, creditos
+	#
+	#li $v0, 4
+	#la $a0, msgControle
+	#syscall
+	#j menu
+	#
 	#
 	#cadastrar:
 	#li $v0, 4
