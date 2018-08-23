@@ -1,5 +1,5 @@
 # PROJETO DE INICIO DE ARQUITETURA
-# versao pre-alfa 23/08
+# versao 1.0 23/08
 
 # Adriano de Oliveira Munin  	17066960
 # Fabio Seiji Irokawa   	17057720
@@ -18,7 +18,8 @@
 	msgCadastroKm:		.asciiz	"\n Insira a km atual do veiculo: "
 	msgCadastroQtd:		.asciiz "\n Insira a quantidade de combustivel: "
 	msgCadastroPreco:	.asciiz	"\n Insira o preco por litro (ex: R$3,99/L = 3.99): "	
-	
+	msgCreditos: 		.asciiz "\n Adriano de Oliveira Munin 17066960 \n Cesar Augusto Pinardi 17270182 \n Fabio Luis Dumont 17049461 \n Fabio Seiji Irokawa 17057720 \n Lucas Rodrigues Coutinho 17776501 \n "
+
 .text
 main:
 	#mensagens de introdução
@@ -28,6 +29,11 @@ main:
 	
 	li $v0, 4
 	la $a0, msgMenu
+	syscall
+	
+	
+	li $v0, 4
+	la $a0, msgCreditos
 	syscall
 
 
