@@ -2,7 +2,7 @@
 
 Anotações 
 
-<nome> .space <valor> #fazer um vetor
+<nome> .space <valor> #fazer um vetor V
 =============================////\\\\========================================
 Precisamos aprender
 
@@ -12,7 +12,7 @@ criar V
 manipular vetores 
 operaçoes V
 =============================////\\\\========================================
-receber valor do teclado e printar
+receber valor do teclado e printar V
 
 .text # indica que as linhas seguintes contém instruções
 .globl main # define o símbolo main como sendo global
