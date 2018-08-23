@@ -4,7 +4,7 @@
 # Adriano de Oliveira Munin  	17066960
 # Fabio Seiji Irokawa   	17057720
 # Cesar Augusto Pinardi 	17270182
-# Lucas Coutinho        	17776501
+# Lucas Rodrigues Coutinho      17776501
 # Fabio Luis Dumont     	17049461
 
 
@@ -18,8 +18,11 @@
 	msgCadastroKm:		.asciiz	"\n Insira a km atual do veiculo: "
 	msgCadastroQtd:		.asciiz "\n Insira a quantidade de combustivel: "
 	msgCadastroPreco:	.asciiz	"\n Insira o preco por litro (ex: R$3,99/L = 3.99): "	
-	msgCreditos: 		.asciiz "\n Adriano de Oliveira Munin 17066960 \n Cesar Augusto Pinardi 17270182 \n Fabio Luis Dumont 17049461 \n Fabio Seiji Irokawa 17057720 \n Lucas Rodrigues Coutinho 17776501 \n "
-
+	msgCadastroConcluido:	.asciiz	"\n Cadastro realizado com sucesso!\n "
+	msgCreditos: 	  	.asciiz "\n Adriano de Oliveira Munin 17066960 \n Cesar Augusto Pinardi 17270182 \n Fabio Luis Dumont 17049461 \n Fabio Seiji Irokawa 17057720 \n Lucas Rodrigues Coutinho 17776501 \n "
+	msgExcluir:		.asciiz "\n Insira a data que deseja excluir: "
+	msgConsumoMedio:	.asciiz "\n Consumo medio do veiculo: "
+	
 .text
 main:
 	#mensagens de introdução
@@ -31,7 +34,70 @@ main:
 	la $a0, msgMenu
 	syscall
 	
+	#li $v0, 5 					# Codigo SysCall p/ ler inteiros
+	#syscall 					# Inteiro lido vai ficar em $v0
+	#
+	#beq $v0, 0, exit
+	#beq $v0, 1, cadastrar
+	#beq $v0, 2, excluir_abastecimento
+	#beq $v0, 3, exibir_abastecimento
+	#beq $v0, 4, exibir_consumo_medio
+	#beq $v0, 5, exibir_preco_medio_posto
+	#beq $v0, 6, creditos
+	#
+	#cadastrar:
+	#li $v0, 4
+	#la $a0, msgCadastroData
+	#syscall
+	#
+	#li $v0, 5 					
+	#syscall 
+	#
+	#li $v0, 4
+	#la $a0, msgCadastroPosto
+	#syscall
+	#
+	#li $v0, 5 					
+	#syscall
+	#
+	#li $v0, 4
+	#la $a0, msgCadastroKm
+	#syscall
+	#
+	#li $v0, 5 					
+	#syscall
+	#
+	#li $v0, 4
+	#la $a0, msgCadastroQtd
+	#syscall
+	#
+	#li $v0, 5 					
+	#syscall
+	#
+	#li $v0, 4
+	#la $a0, msgCadastroPreco
+	#syscall
+	#
+	#li $v0, 5 					
+	#syscall
+	#
+	#li $v0, 4
+	#la $a0, msgCadastroConcluido
+	#syscall
+	#
+	#excluir_abastecimento:
+	#li $v0, 4
+	#la $a0, msgExcluir 
+	#syscall
+	#
+	#li $v0, 5 					
+	#syscall
+	#
+	#exibir_abastecimento:
+	#exibir_consumo_medio:
+	#exibir_preco_medio_posto:
 	
+	creditos:
 	li $v0, 4
 	la $a0, msgCreditos
 	syscall
