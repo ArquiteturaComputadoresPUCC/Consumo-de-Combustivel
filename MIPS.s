@@ -11,30 +11,30 @@
 .data
 
 	cadastro:     				.space 32000
-	indice:								.byte 0
-	zeroFloat: 						.float 0.0
+	indice:					.byte 0
+	zeroFloat: 				.float 0.0
 
-	pulaLinha: 						.asciiz "\n"
-	msgInicio:  					.asciiz "PROJETO ARQUITETURA DE COMPUTADORES:\n\nCONTROLE DE ABASTECIMENTO\n"
-	msgMenu: 							.asciiz "\nMenu:\n 1) Cadastro \n 2) Excluir abastecimento \n 3) Exibir abastecimento \n 4) Exibir consumo medio \n 5) Exibir preco medio por posto \n 6) Creditos \n 0) Sair \n"
+	pulaLinha: 				.asciiz "\n"
+	msgInicio:  				.asciiz "PROJETO ARQUITETURA DE COMPUTADORES:\n\nCONTROLE DE ABASTECIMENTO\n"
+	msgMenu: 				.asciiz "\nMenu:\n 1) Cadastro \n 2) Excluir abastecimento \n 3) Exibir abastecimento \n 4) Exibir consumo medio \n 5) Exibir preco medio por posto \n 6) Creditos \n 0) Sair \n"
 	msgCadastroData:			.asciiz "\nInsira a data do abastecimento:"
-	msgDia: 	   					.asciiz "\nDigite o dia: "
-	msgMes: 	   					.asciiz "Digite o mes(ex. abril = 4): "
-	msgAno: 	   					.asciiz "Digite o ano(ex. 2018 = 2018): "
+	msgDia: 	   			.asciiz "\nDigite o dia: "
+	msgMes: 	   			.asciiz "Digite o mes(ex. abril = 4): "
+	msgAno: 	   			.asciiz "Digite o ano(ex. 2018 = 2018): "
 	msgCadastroPosto:			.asciiz	"\nInsira o nome do posto: "
 	msgCadastroKm:				.asciiz	"\nInsira a km atual do veiculo: "
 	msgCadastroQtd:				.asciiz "\nInsira a quantidade de combustivel: "
 	msgCadastroPreco:			.asciiz	"\nInsira o preco por litro (ex: R$3,99/L = 3.99): "
-	msgCadastroConcluido:	.asciiz	"\nCadastro realizado com sucesso!\n "
+	msgCadastroConcluido:			.asciiz	"\nCadastro realizado com sucesso!\n "
 	msgCreditos: 	  			.asciiz "\nAdriano de Oliveira Munin 17066960 \n Cesar Augusto Pinardi 17270182 \n Fabio Luis Dumont 17049461 \n Fabio Seiji Irokawa 17057720 \n Lucas Rodrigues Coutinho 17776501 \n "
-	msgExcluir:						.asciiz "\nInsira a data que deseja excluir: "
+	msgExcluir:				.asciiz "\nInsira a data que deseja excluir: "
 	msgConsumoMedio:			.asciiz "\nConsumo medio do veiculo: "
-	msgControle:					.asciiz "\nInsira um valor de 0 a 6\n"
+	msgControle:				.asciiz "\nInsira um valor de 0 a 6\n"
 	msgQtdCadastro:				.asciiz "\nQuantidade de cadastros: "
 	msgMesInvalido:				.asciiz "\nO mes digitado eh invalido!"
 	msgExclusaoErro:			.asciiz "\nA data digitada nao foi encontrada!"
-	msgExclusaoSucesso:		.asciiz "\nExclusao feita com Sucesso!"
-
+	msgExclusaoSucesso:			.asciiz "\nExclusao feita com Sucesso!"
+	msgBarra:				.asciiz "/"
 
 	msgIdicaTeste:				.asciiz "\n**********************************\n"
 
@@ -96,21 +96,8 @@ main:
 		la $a0, msgCadastroData
 		syscall
 
-		jal conveteData		# Parametros que podem ser passados para funcao a0, a1, a2, a3
+		jal converteData		# Parametros que podem ser passados para funcao a0, a1, a2, a3
 					# Parametro retornado em v1
-
-
-		li $v0, 4
-		la $a0, msgIdicaTeste
-		syscall
-
-		li $v0, 1		# Codigo de impressao de inteiro
-		addi $a0, $v1, 0	# Imprime qtd de cadastros
-		syscall			#
-
-		li $v0, 4
-		la $a0, msgIdicaTeste
-		syscall
 
 		addi $t0, $t0, 0	# Zera t0 usado como indice
 		sw $v1, cadastro($t0)	# Grava os dias no vetor cadastro
@@ -196,48 +183,63 @@ main:
 # Fim conclusao cadastro---------------------------------------------------------------------------------
 # Fim Cadastro*******************************************************************************************
 
-#Inicio exclusao*****************************************************************************************
+
+# Inicio exclusao****************************************************************************************
 	excluir_abastecimento:
-		li $v0, 4														#Setando Syscall para exibir Msg
-		la $a0, msgExcluir									#Setando string a ser printada
-		syscall															#Execucao
+		li $v0, 4				#Setando Syscall para exibir Msg
+		la $a0, msgExcluir			#Setando string a ser printada
+		syscall					#Execucao
 
-		jal conveteData											#Insercao da data e retorno em Qtd de dias em v1
+		jal converteData			#Insercao da data e retorno em Qtd de dias em v1
 
-		add	 $t0, $zero, $zero							#Zerando t0 p/ ser usado como indice de cadastro
-		addi $t1, $zero, -1									#Setando t1 em -1 p/ setar o valor de exclusao(-1)
-		addi $t2, $zero, 32000							#Valor limite do inice
+		add $t0, $zero, $zero			#Zerando t0 p/ ser usado como indice de cadastro
+		addi $t1, $zero, -1			#Setando t1 em -1 p/ setar o valor de exclusao(-1)
+		addi $t2, $zero, 32000			#Valor limite do inice
 
-		procura_excluir:
-			lw   $t3, cadastro($t0)						#Passando p/ t3 info do cadastro desejado
-			beq  $t3, $v1, exclusao						#Comparando a data informada com o dado cadastrado, caso sejam iguais jump p/ exclusao
-			addi $t0, $t0, 32									#Incremento do indice p/ prox endereco de comparacao
-			beq  $t0, $t2, exclusaoErro				#Se indice == 3200(setado anteriormente) jump p/ exclusaoErro
-			j 	 procura_excluir							#Jump de laco
+	procura_excluir:
+		lw   $t3, cadastro($t0)			#Passando p/ t3 info do cadastro desejado
+		beq  $t3, $v1, exclusao			#Comparando a data informada com o dado cadastrado, caso sejam iguais jump p/ exclusao
+		addi $t0, $t0, 32			#Incremento do indice p/ prox endereco de comparacao
+		beq  $t0, $t2, exclusaoErro		#Se indice == 3200(setado anteriormente) jump p/ exclusaoErro
+		j 	 procura_excluir		#Jump de laco
 
-		exclusao:
-			sw $t1, cadastro($t0)							#Setando data da posicao desejada em -1
-			j exclusaoSucesso									#Jump p exclusaoSucesso
+	exclusao:
+		sw $t1, cadastro($t0)			#Setando data da posicao desejada em -1
+		j exclusaoSucesso			#Jump p exclusaoSucesso
 
-		exclusaoErro:
-			li $v0, 4													#Setando Syscall para exibir Msg
-			la $a0, msgExclusaoErro						#Setando string a ser printada
-			syscall														#Execucao
+	exclusaoErro:
+		li $v0, 4				#Setando Syscall para exibir Msg
+		la $a0, msgExclusaoErro			#Setando string a ser printada
+		syscall					#Execucao
 
-			j menu														#Jump p menu
+		j menu					#Jump p menu
 
-		exclusaoSucesso:
-			li $v0, 4													#Setando Syscall para exibir Msg
-			la $a0, msgExclusaoSucesso				#Setando string a ser printada
-			syscall														#Execucao
+	exclusaoSucesso:
+		li $v0, 4				#Setando Syscall para exibir Msg
+		la $a0, msgExclusaoSucesso		#Setando string a ser printada
+		syscall					#Execucao
 
-			j menu														#Jump p menu
+		j menu					#Jump p menu
 
 
-#Fim exclusao*****************************************************************************************
+# Fim exclusao****************************************************************************************
+	
+	
+# Inicio exibir abastecimento*************************************************************************
 	exibir_abastecimento:
+		add $t0, $zero, $zero			#Zerando t0 p/ ser usado como indice
+		
+		
+		
+		slt 
+	
+	
+	
 		jal imprimeCadastros
 		j menu
+		
+# Fim exibir abastecimento****************************************************************************	
+
 
 	exibir_consumo_medio:
 
@@ -261,15 +263,17 @@ main:
 
 
 # Inicio funcoes#########################################################################################
+	
+
 # Inicio conversao de data*******************************************************************************
-	conveteData:
+converteData:
 	li $v0, 4		#
 	la $a0, msgDia		# Msg dia
 	syscall			#
 
 	li $v0, 5 		#
 	syscall 		# Le inteiro dia
-	add $t5, $v0, $zero	# Armazena o dia em t5
+	add $t1, $v0, $zero	# Armazena o dia em t1
 
 	li $v0, 4		#
 	la $a0, msgMes		# Msg mes
@@ -277,7 +281,7 @@ main:
 
 	li $v0, 5 		#
 	syscall 		# Le inteiro mes
-	add $t1, $v0, $zero	# Armazena o mes em t1
+	add $t2, $v0, $zero	# Armazena o mes em t2
 
 	li $v0, 4		#
 	la $a0, msgAno		# Msg ano
@@ -285,73 +289,73 @@ main:
 
 	li $v0, 5 		#
 	syscall 		# Le inteiro ano
-	add $t2, $v0, $zero	# Armazena o ano em t2
+	add $t3, $v0, $zero	# Armazena o ano em t3
 
-	addi $t1, $t1, -1   #Subtrair um mes p/ nao contar o mes incompleto
-  addi $t4, $zero, 0  #Zerar de qtd de dias parcial dos meses
+	mul $t3, $t3, 10000	# Multiplica ano por 10000, abre espaco para adicionar mes e dia ex: 20180000 = 2018mmdd
+	mul $t2, $t2, 100	# Multiplica mes por 100, abre espaco para adicionar dia ex: 0400 = 04dd
+	
+	add $t3, $t3, $t2
+	add $t3, $t3, $t1
+	
+	add $v1, $t3, $zero	# Salva data convertida no reg v1 de passagem de parametros
+	
+	jr $ra
+# Fim conversao de data**********************************************************************************
 
-contagemMes:
-
-  beq $t1, 1, trinta1	# Satos para multiplicar qtd de dias dos meses
-  beq $t1, 2, vinte8
-  beq $t1, 3, trinta1
-  beq $t1, 4, trinta
-  beq $t1, 5, trinta1
-  beq $t1, 6, trinta
-  beq $t1, 7, trinta1
-  beq $t1, 8, trinta1
-  beq $t1, 9, trinta
-  beq $t1, 10, trinta1
-  beq $t1, 11, trinta
-  beq $t1, 12, trinta1
-  beq $t1, 0, contagemAno
-
-trinta1:
-  addi $t3, $zero, 31     #Setar t3 em 31
-  add  $t4, $t4, $t3      #Adicionar t3 nas Qtds de dias contados
-  addi $t1, $t1, -1       #Decrementar Qtd de mes
-  j    contagemMes        #jump to contagemMes
-
-trinta:
-  addi $t3, $zero, 30     #Idem jump trinta1
-  add  $t4, $t4, $t3
-  addi $t1, $t1, -1
-  j    contagemMes
-
-vinte8:
-  addi $t3, $zero, 28     #Idem jump trinta1
-  add  $t4, $t4, $t3
-  addi $t1, $t1, -1
-  j    contagemMes
-
-contagemAno:
-
-    add $t1, $zero, $t4   #Salvando contagem dos meses em t1
-
-    addi $t2, $t2, -2018  #Subtraindo 2018 do ano inserido, pois tal ano e o ano inicial
-    addi $t3, $zero, 365  #Adicionando 365 em t3 para fazer posteriormente a multiplicacao
-    mul  $t2, $t2, $t3    #Multiplicando a diferenca de anos por 365 para obter a qtd de dias
-
-    add $t3, $t5, $t1     #Somando os resultados
-    add $v1, $t3, $t2     #Resultado final em v1
+	
+# Inicio  desconversao de data***************************************************************************
+desconverteData: 		# Data a ser desconvertida recebida em a1
+	div $a1, $a1, 100	# Divide data por 100 e salva o resto t1, resto = dia
+	mfhi $t1
+	
+	div $a1, $a1, 100	# Divide data por 100 e salva o resto t2, resto = mes, sobra o ano em a1
+	mfhi $t2
+	
+	
+	li $v0, 1		# Codigo de impressao de inteiro
+	addi $a0, $t1, 0	# Imprime qtd de dias
+	syscall			#
+	
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, msgBarra	# Imprime barra para separar dias
+	syscall			#
+	
+	li $v0, 1		# Codigo de impressao de inteiro
+	addi $a0, $t2, 0	# Imprime qtd de dias
+	syscall			#
+	
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, msgBarra	# Imprime barra para separar dias
+	syscall			#
+	
+	li $v0, 1		# Codigo de impressao de inteiro
+	addi $a0, $a1, 0	# Imprime qtd de dias
+	syscall			#
 
 	jr $ra
-
-# Fim conversao de data**********************************************************************************
+# Fim desconversao de data*******************************************************************************
 
 
 # Inicio funcao imprime cadastros************************************************************************
 imprimeCadastros:
 	addi $t0, $t0, 0	# Idice 0 do vetor
+	
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, msgIdicaTeste	# Separacao dos dados
+	syscall			#
+
 
 loopImprime:
 
 	lw $t2, cadastro($t0)	# Le a qtd de dias do vetor e salva em t2
 	beq $t2, -1, fimSemPrimt
 
-	li $v0, 1		# Codigo de impressao de inteiro
-	addi $a0, $t2, 0	# Imprime qtd de dias
-	syscall			#
+	add $t9, $ra, $zero	# Salva endereco de retorno desta funcao
+
+	addi $a1, $t2, 0	# Salva data a ser convertida em a1 
+	jal desconverteData	# Passa a1 como parametro para desconvercao da data
+
+	add $ra, $t9, $zero	# Restaura endereco de retorno desta funcao
 
 	li $v0, 4		# Codigo de impressao de string
 	la $a0, pulaLinha	# Pula linha
@@ -406,8 +410,6 @@ fimSemPrimt:
 	bne $t0, $t2, loopImprime
 
 	jr $ra
-
-
 # Fim funcao imprime cadastros***************************************************************************
 
 
