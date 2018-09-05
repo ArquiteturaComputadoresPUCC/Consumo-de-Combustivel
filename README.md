@@ -42,3 +42,7 @@ iniciar tudo com 0
 multiplicar por 0 para zerar um cadastro
 =============================////\\\\========================================
 converter para dia a partir da data inicial = 1/1/2018 até 2118
+=============================////\\\\========================================
+Site onde copia string:
+https://stackoverflow.com/questions/5698217/mips-compare-input-string-to-one-stored-in-memory?rq=1
+
