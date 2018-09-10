@@ -10,9 +10,11 @@
 
 .data
 
-	cadastro:     				.space 32000
+	cadastro:     				.space 320
 	indice:					.byte 0
 	zeroFloat: 				.float 0.0
+	umFloat: 				.float 1.0
+	precoMedio:				.space 200
 
 	pulaLinha: 				.asciiz "\n"
 	msgInicio:  				.asciiz "PROJETO ARQUITETURA DE COMPUTADORES:\n\nCONTROLE DE ABASTECIMENTO\n"
@@ -45,13 +47,16 @@ main:
 		la $a0, msgInicio				# Parametro (string a ser escrita)
 		syscall
 
-		addi $t0, $t0, 0	# Zera t0
-		addi $t1, $t0, -1	# Seta t1 com -1 (ira indicar bloco livre para gravacao)
-
+		addi $t0, $zero, 0	# Zera t0
+		#addi $t2, $zero, 0	# Zera t0
+		addi $t1, $zero, -1	# Seta t1 com -1 (ira indicar bloco livre para gravacao)
 	setaVetor:
 		sw $t1, cadastro($t0)	# Grava -1 em todas as primeiras posicoes dos blocos
+		#sw $t1, precoMedio($t2)
 		addi $t0, $t0, 32	# incrementa indice
-		bne $t0, 32000, setaVetor
+		#addi $t2, $t2, 20	# incrementa indice
+		
+		bne $t0, 320, setaVetor
 
 	menu:
 
@@ -111,8 +116,8 @@ main:
 
 		addi $t0, $t0, 4	# Seta t0 para 4 (Posicao do nome do posto)
 		li $v0, 8		# Codigo de leitura de string
-		la $a0, cadastro($t0)	#
-		li $a1, 16		#
+		la $a0, cadastro($t0)	# 
+		li $a1, 16		#	
 		syscall			#
 # Fim leitura do nome do posto---------------------------------------------------------------------------
 
@@ -168,17 +173,6 @@ main:
 		la $a0, msgCadastroConcluido
 		syscall
 
-		li $v0, 4
-		la $a0, msgQtdCadastro
-		syscall
-
-		addi $t1, $zero, 32
-		div $t0, $t0, $t1
-
-		li $v0, 1		# Codigo de impressao de inteiro
-		addi $a0, $t0, 0	# Imprime qtd de cadastros
-		syscall			#
-
 		j menu
 # Fim conclusao cadastro---------------------------------------------------------------------------------
 # Fim Cadastro*******************************************************************************************
@@ -194,7 +188,7 @@ main:
 
 		add $t0, $zero, $zero			#Zerando t0 p/ ser usado como indice de cadastro
 		addi $t1, $zero, -1			#Setando t1 em -1 p/ setar o valor de exclusao(-1)
-		addi $t2, $zero, 32000			#Valor limite do inice
+		addi $t2, $zero, 320			#Valor limite do inice
 
 	procura_excluir:
 		lw   $t3, cadastro($t0)			#Passando p/ t3 info do cadastro desejado
@@ -220,36 +214,240 @@ main:
 		syscall					#Execucao
 
 		j menu					#Jump p menu
-
-
 # Fim exclusao****************************************************************************************
 	
 	
 # Inicio exibir abastecimento*************************************************************************
 	exibir_abastecimento:
-		add $t0, $zero, $zero			#Zerando t0 p/ ser usado como indice
+		add $t0, $zero, $zero			#Zerando t0 p/ ser usado como indice externo
+		add $t7 $zero, $zero			#Zerando t8 p/ ser usado como indice interno
 		
+	loopExterno:
+		beq $t0, 288, fim
+			
+	loopInterno:		
+		lw $t2, cadastro($t0)
+		lw $t3, cadastro($t7)
+		bgt $t3, $t2, troca
+		addi $t7, $t7, 32	
+		beq $t7, 320, fimInterno
+		j loopInterno
+# Inicio troca de posicoes----------------------------------------------------------------------------		
+	troca:
+		addi $t4, $zero, 32
+	loopTroca:	
+		lw $t2, cadastro($t0)
+		lw $t3, cadastro($t7)
 		
+		sw $t3, cadastro($t0)
+		sw $t2, cadastro($t7)
+
+		subi $t4, $t4, 4
 		
+		addi $t0, $t0, 4
+		addi $t7, $t7, 4
+		
+		bne $t4, 0, loopTroca	
+		
+		j loopInterno
+# Fim troca de posicoes-------------------------------------------------------------------------------	
+	fimInterno:
+		addi $t0, $t0, 32
+		addi $t7, $t0, 32
+		j loopExterno
 	
-	
-	
+	fim:	
 		jal imprimeCadastros
-		j menu
-		
+		j menu		
 # Fim exibir abastecimento****************************************************************************	
 
 
+# Inicio consumo medio********************************************************************************	
 	exibir_consumo_medio:
-		jal consumoMedio
-
+	jal consumoMedio		
+		
 		j menu
+# Fim consumo medio***********************************************************************************
 
-	exibir_preco_medio_posto:
 
-		j menu
+# Inicio preco medio**********************************************************************************
+exibir_preco_medio_posto:
+	addi $t2, $zero, 0	# Zera t0
+	addi $t1, $zero, -1	# Seta t1 com -1 (ira indicar bloco livre para gravacao)
+	add $t0, $zero, $zero			# Seta t0 para pasicao do byte de status no nome
+	add $t3, $zero, 15
+	
+zeraVetor:# Zera vetor a cada impressao de media de preco 
+	lb $t0, cadastro($t3)
+	sw $t1, precoMedio($t2)
+	addi $t3, $t3, 32
+	addi $t2, $t2, 20		# incrementa indice		
+	bne $t2, 200, zeraVetor
+	
+vetorCadastro:# Faz um ciclo por posto (percorre vetor de cadastro)
+	lwc1 $f0, zeroFloat		#Setando f0 com0 numero 0 
+	lwc1 $f1, umFloat		#Setando f3 como numero 1
+	lwc1 $f2, zeroFloat		#Zerando qtd de preços somados
+	lwc1 $f3, zeroFloat		#Zerando somatorio dos preços
+	add $t1, $zero, $zero			# Indice vetor media
+	#add $t3, $zero, $zero
 
-	creditos:
+
+	
+	beq $t0, 320, ordena 
+	addi $t3, $t0, 15	 		# 15 = indice do status
+	lb $s1, cadastro($t3)			# Le o status de media
+	bne $s1, -1, media			# Se o status for diferente -1 (posto ja feita media), faz a media
+	add $t0, $t0, 32			# se nao vai para proximo nome
+	j vetorCadastro
+
+media:
+	lw $t5, cadastro($t0)		#le nome do posto a ser feita media
+	bne $t5, -1, percorreVetor2
+	add $t0, $t0, 32
+	j vetorCadastro
+# Inicio copia nome-----------------------------------------------------------------------------------	
+
+percorreVetor2:				# Procura posicao vazia no vetor de media
+	lw $t2, precoMedio($t1)
+	beq $t2, -1, copia
+	addi $t1, $t1, 20
+	j percorreVetor2
+
+copia:
+	addi $t5, $zero, 15		# Qtd de repeticoes loop (Qtd letras)
+	add $t3, $t0, 4			# Salva indice cadastro, pois nao pode ser perdido
+	add $t4, $t1, 4			# Salva indice precoMedio, pois nao pode ser perdido
+
+copiaLetra:	
+	lb $s1, cadastro($t3)			# Le letra do cadastro
+	sb $s1, precoMedio($t4)			# Salva letra no precoMedio
+	subi $t5, $t5, 1			# Decrementa loop
+	addi $t3, $t3, 1			# Incrementa indices
+	addi $t4, $t4, 1		
+	bne $t5, 0, copiaLetra	   		# Condicao de parada
+	
+	addi $t3, $t0, 28 
+	lwc1 $f3, cadastro($t3)			# Move para f3 o preço			
+	#add.s $f3, $f3, $f0 			# Soma preço no somatorio de preços
+	
+# Fim copia nome--------------------------------------------------------------------------------------		        
+# Inicio soma media-----------------------------------------------------------------------------------
+#	addi $t3, $t0, 19			# Seta t3 para pasicao do byte de status no nome
+#	#add $t1, $zero, $zero			# Indice vetor media
+#vetorCadastro2:
+#	lb $s1, cadastro($t0)			# Le o status de media
+#	bne $s1, -1, comparaNome			# Se o status for diferente -1 (posto ja feita media), faz a media
+#	add $t0, $t0, 32			# se nao vai para proximo nome
+#	j vetorCadastro2
+
+# Inicio compara nomes---------------------------------------------------------------------------------
+#t0 e t2 estao no mesmo nome em vetores diferentes
+comparaNome:
+	add.s $f2, $f2, $f1			# Soma 1 a qtd de postos somados	
+	addi $t5, $zero, 15			# Qtd de repeticoes loop (Qtd letras)
+	addi $s3, $t0, 32			# Salva indice cadastro, +32 para proximo nome
+	#add $t4, $t1, 4			# Salva indice precoMedio, pois nao pode ser perdido
+percorreCadastro:
+	beq $s3, 320, fimMedia
+	lw $t2, cadastro($s3)
+	beq $t2, -1, loopCadastro
+	addi $t3, $s3, 4
+	addi $t5, $zero, 15
+	add $t4, $t1, 4			# Salva indice precoMedio, (nao movimenta)
+strcmp:	#Compara as strings letra por letra
+	lb $s1, cadastro($t3)					
+	lb $s2, precoMedio($t4)			
+	subi $t5, $t5, 1			# Decrementa loop
+	addi $t3, $t3, 1			# Incrementa indices
+	addi $t4, $t4, 1
+	bne $s1, $s2, loopCadastro		# Se letras diferentes pula para proximo nome
+	bne $t5, 0, strcmp			
+# Fim compara nomes---------------------------------------------------------------------------------	
+	#---Nomes iguais---
+	addi $t6, $zero, -1
+	addi $t3, $s3, 15			# Adiciona 1 no indice para chegar no status do nome (16)	
+	sb $t6, cadastro($t3)			# Marca com -1 o nome somado
+	
+	addi $t3, $s3, 28			# Incrementa indice para chegar no preco (15+13=28)
+
+	lwc1 $f4, cadastro($t3)			# Move para f4 o preço
+			
+	add.s $f3, $f3, $f4 			# Soma preço no somatorio de preços
+	add.s $f2, $f2, $f1			# Soma 1 a qtd de postos somados
+	
+	addi $s3, $s3, 32			# Completa o indice para chegar na proxima posicao	
+	j percorreCadastro		 			 	 
+
+loopCadastro:
+	addi $s3, $s3, 32
+	j percorreCadastro
+	
+fimMedia:
+	div.s $f3, $f3, $f2
+ 	add $t4, $t1, $zero
+ 	swc1 $f3, precoMedio($t4)	# Grava o preco no vetor precoMedio 
+	add $t0, $t0, 32	
+	j vetorCadastro	
+
+
+# Fim soma media------------------------------------------------------------------------------------	                
+ 
+ ordena:                            
+
+
+
+# Inicio impressao----------------------------------------------------------------------------------                                                                  
+	addi $t4, $zero, 0 
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, msgIdicaTeste	# Separacao dos dados
+	syscall			#
+
+imprimeMedia:
+
+	#lw $t2, precoMedio($t0)	# Le a qtd de dias do vetor e salva em t2
+	#beq $t2, -1, fimSemPrimt2
+
+	lwc1 $f2, precoMedio($t4)# Le o preco vetor e salva em f0
+	li $v0, 2		# Codigo de impressao de float
+	add.s $f12, $f2, $f0 	# Imprime o preco por litros
+	syscall			#
+		
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, pulaLinha	# Pula linha
+	syscall			#
+		
+	addi $t4, $t4, 4	# Indice 16 do vetor
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, precoMedio($t4)	# Imprime nome do posto
+	syscall			#
+	
+
+	li $v0, 4		# Codigo de impressao de string
+	la $a0, msgIdicaTeste	# Separacao dos dados
+	syscall			#
+
+	addi $t4, $t4, 16
+
+	addi $t2, $zero, 200		#Valor limite do inice
+
+	bne $t4, $t2, imprimeMedia
+
+#fimSemPrimt2:
+#	addi $t0, $t0, 20
+#	addi $t2, $zero, 200		#Valor limite do inice
+
+#	bne $t0, $t2, imprimeMedia
+	
+# Fim impressao-------------------------------------------------------------------------------------
+	j menu	
+
+
+		
+			
+# Fim preco medio*************************************************************************************
+
+creditos:
 		li $v0, 4
 		la $a0, msgCreditos
 		syscall
@@ -260,11 +458,7 @@ main:
 		li $v0, 10
 		syscall
 
-
-
 # Inicio funcoes#########################################################################################
-	
-
 # Inicio conversao de data*******************************************************************************
 converteData:
 	li $v0, 4		#
@@ -301,8 +495,8 @@ converteData:
 	
 	jr $ra
 # Fim conversao de data**********************************************************************************
-
 	
+			
 # Inicio  desconversao de data***************************************************************************
 desconverteData: 		# Data a ser desconvertida recebida em a1
 	div $a1, $a1, 100	# Divide data por 100 e salva o resto t1, resto = dia
@@ -338,7 +532,7 @@ desconverteData: 		# Data a ser desconvertida recebida em a1
 
 # Inicio funcao imprime cadastros************************************************************************
 imprimeCadastros:
-	addi $t0, $t0, 0	# Idice 0 do vetor
+	addi $t0, $zero, 0	# Idice 0 do vetor
 	
 	li $v0, 4		# Codigo de impressao de string
 	la $a0, msgIdicaTeste	# Separacao dos dados
@@ -387,7 +581,7 @@ loopImprime:
 	syscall			#
 
 	addi $t0, $t0, 4	# Indice 28 do vetor
-	lwc1 $f0, cadastro($t0)	# Le o preco vetor e salva em t2
+	lwc1 $f0, cadastro($t0)	# Le o preco vetor e salva em f0
 	li $v0, 2		# Codigo de impressao de float
 	add.s $f12, $f0, $f2 	# Imprime o preco por litros
 	syscall			#
@@ -399,14 +593,14 @@ loopImprime:
 	addi $t0, $t0, 4
 
 
-	addi $t2, $zero, 32000		#Valor limite do inice
+	addi $t2, $zero, 320		#Valor limite do inice
 
 	bne $t0, $t2, loopImprime
 
 fimSemPrimt:
 	addi $t0, $t0, 32
-	addi $t2, $zero, 32000		#Valor limite do inice
-
+	addi $t2, $zero, 320		#Valor limite do inice
+	
 	bne $t0, $t2, loopImprime
 
 	jr $ra
@@ -415,49 +609,28 @@ fimSemPrimt:
 # Inicio funcao consumo medio************************************************************************
 	consumoMedio:
 	addi $t0, $t0, 0	# Idice 0 do vetor
-	addi $t1, $zero, 32000
-	addi $t3, $t3, 0 #maior Km
-	addi $t5, $t5, 0 # menor Km
 	
-	
-	li $v0, 4
-	la $a0, msgConsumoMedio	#print msg
-	syscall
-	
-	addi $t0, $t0, 20	# Indice 20 do vetor
-	lw $t2, cadastro($t0)	# Le a qtd de Km vetor e salva em t2
-	bgt $t2, $t3, maiorKm
+	addi $t0, $t0, 20	# Idice 0 do vetor
+	lw $t1, cadastro($t0)	# Le a qtd de Km vetor e salva em t2
+	addi $t7, $t1, 0
 	
 	loopMaior:
-	bgt $t0, $t1, resposta
-	addi $t0, $t0, 32	# Indice 20 do vetor
-	looploopMaior:
-	lw $t2, cadastro($t0)	# Le a qtd de Km vetor e salva em t2
-	beq $t2, -1, somaData
-	bgt $t2, $t3, maiorKm
+	beq $t0, 308, resposta
+	addi $t0, $t0, 32
+	lw $t1, cadastro($t0)	# Le a qtd de Km vetor e salva em t2
+	bgt $t1, $t7, swap
 	j loopMaior
-	
-	maiorKm:
-	add $t3, $t2, $zero # maior valor em t3
+
+	swap:
+	addi $t7, $t1, 0
 	j loopMaior
-	
-	somaData:
-	addi $t0, $t0, 32	# Indice 20 do vetor
-	bgt $t0, $t1, resposta
-	j looploopMaior
 	
 	resposta:
 	li $v0, 1		# Codigo de impressao de inteiro
-	addi $a0, $t3, 0	# Imprime qtd de km
-	syscall			#
+	addi $a0, $t7, 0	# Imprime qtd de km
+	syscall	
 	
-	
-	
-	
-	
+		
 	jr $ra
 # Fim funcao consumo medio***************************************************************************
-
-
-
 # Fim funcoes############################################################################################
